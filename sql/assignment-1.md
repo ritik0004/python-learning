@@ -73,6 +73,7 @@ VALUES
 ### 1. Show all records from the table.
 
 Expected columns: all columns.
+select * from  loan_applications
 
 ---
 
@@ -83,6 +84,7 @@ Expected columns:
 ```text
 application_id, customer_id, loan_amount, loan_status
 ```
+select application_id, customer_id, loan_amount, loan_status from  loan_applications
 
 ---
 
@@ -93,7 +95,7 @@ Expected columns:
 ```text
 application_id, customer_id, loan_amount, city
 ```
-
+select application_id, customer_id, loan_amount, city from  loan_applications where loan_amount >500000
 ---
 
 ### 4. Show applications from Delhi and Mumbai only.
@@ -103,7 +105,8 @@ Expected columns:
 ```text
 application_id, customer_id, city, loan_status
 ```
-
+### 4. Show applications from Delhi and Mumbai only.
+select application_id, customer_id, loan_status, city from  loan_applications where city in ('Delhi','Mumbai')
 ---
 
 ### 5. Show applications where credit score is less than `650`.
@@ -113,7 +116,7 @@ Expected columns:
 ```text
 application_id, customer_id, credit_score, loan_status
 ```
-
+select application_id, customer_id, loan_status, credit_score from  loan_applications where credit_score<'650'
 ---
 
 ## Aggregation
@@ -125,7 +128,7 @@ Expected output:
 ```text
 total_applications
 ```
-
+select count( distinct application_id) from loan_applications
 ---
 
 ### 7. Count applications by loan status.
@@ -135,7 +138,8 @@ Expected output:
 ```text
 loan_status | total_applications
 ```
-
+select total_applications, count(application_id) from loan_applications
+group by loan_status
 ---
 
 ### 8. Calculate total approved loan amount.
@@ -145,7 +149,8 @@ Expected output:
 ```text
 total_approved_loan_amount
 ```
-
+select loan_status, sum(loan_amount) as total_approved_loan_amount from loan_applications
+group by loan_status having  loan_status ='approved'
 ---
 
 ### 9. Calculate average loan amount by employment type.
@@ -155,7 +160,7 @@ Expected output:
 ```text
 employment_type | avg_loan_amount
 ```
-
+ select  employment_type, avg(loan_amount) as avg_loan_amount from loan_applications group by  employment_type
 ---
 
 ### 10. Find city-wise number of applications.
@@ -165,6 +170,7 @@ Expected output:
 ```text
 city | total_applications
 ```
+select city , count(application_id) from loan_applications group by city
 
 ---
 
@@ -183,7 +189,8 @@ Expected output:
 ```text
 approval_rate
 ```
-
+select sum((select count(application_id) from loan_applications where loan_status='approved' )/(select count(application_id) from loan_applications)*100) 
+as  approval_rate from loan_applications
 ---
 
 ### 12. Calculate rejection rate.
@@ -199,7 +206,8 @@ Expected output:
 ```text
 rejection_rate
 ```
-
+select sum((select count(application_id) from loan_applications where loan_status='rejected' )/(select count(application_id) from loan_applications)*100)
+as  rejection_rate from loan_applications
 ---
 
 ### 13. Calculate approval rate by city.
@@ -209,7 +217,9 @@ Expected output:
 ```text
 city | total_applications | approved_applications | approval_rate
 ```
-
+select city , sum(application_id) , (select count(application_id) from loan_applications where loan_status='approved') , 
+sum ((select count(application_id) from loan_applications where loan_status='approved')/(select count(application_id) from loan_applications))*100
+ from loan_applications group by city
 ---
 
 ### 14. Calculate approval rate by employment type.
@@ -219,7 +229,10 @@ Expected output:
 ```text
 employment_type | total_applications | approved_applications | approval_rate
 ```
-
+select employment_type , sum(application_id) , (select count(application_id) from loan_applications where loan_status='approved') , 
+sum ((select count(application_id) from loan_applications where loan_status='approved')/(select count(application_id) from loan_applications))*100
+as approval_rate from loan_applications
+group by employment_type
 ---
 
 ### 15. Find total approved loan amount by city.
@@ -229,7 +242,8 @@ Expected output:
 ```text
 city | total_approved_loan_amount
 ```
-
+select city , sum(loan_amount) from loan_applications
+grouup by city having loan_status='approved'
 ---
 
 ## Filtering With Aggregation
@@ -241,7 +255,7 @@ Expected output:
 ```text
 city | total_applications
 ```
-
+with cte as(select city,sum(application_id) as total_applications from  loan_applications group by city) , select city from cte where total_applications>2
 ---
 
 ### 17. Find employment types where average loan amount is greater than `400000`.
@@ -251,7 +265,7 @@ Expected output:
 ```text
 employment_type | avg_loan_amount
 ```
-
+with cte as(select employment_type,avg(loan_amount) as avg_loan_amount from  loan_applications group by employment_type) , select employment_type from cte where avg_loan_amount>400000
 ---
 
 ### 18. Find cities where total approved loan amount is greater than `1000000`.
@@ -261,7 +275,8 @@ Expected output:
 ```text
 city | total_approved_loan_amount
 ```
-
+with cte as(select (distinct city), sum(loan_amount) as total_approved_loan_amount from loan_applications where loan_status='approved' group by city),
+select city , total_approved_loan_amount  from cte where total_approved_loan_amount>1000000
 ---
 
 ## Sorting
@@ -273,7 +288,7 @@ Expected columns:
 ```text
 application_id, customer_id, loan_amount
 ```
-
+select application_id, customer_id, loan_amount from loan_applications order by loan_amount desc limit 5
 ---
 
 ### 20. Show cities sorted by highest number of applications.
@@ -283,7 +298,7 @@ Expected output:
 ```text
 city | total_applications
 ```
-
+select city , sum(application_id) as xx from loan_applications group by city order by sum(application_id) desc
 ---
 
 ## Date-Based Questions
@@ -305,7 +320,9 @@ For PostgreSQL:
 ```sql
 TO_CHAR(application_date, 'YYYY-MM')
 ```
-
+with cte as 
+( select TO_CHAR(application_date, 'YYYY-MM') , application_id from loan_applications ) ,
+select 
 ---
 
 ### 22. Find total approved loan amount by month.
@@ -314,8 +331,9 @@ Expected output:
 
 ```text
 application_month | total_approved_loan_amount
-```
-
+```  with cte as ( 
+select TO_CHAR(application_date, 'YYYY-MM') ,loan_amount from loan_applications where loan_status='approved')
+select as xx , sum(loan_amount) from cte group  by xx
 ---
 
 ## Duplicate / Customer Behavior
@@ -327,7 +345,8 @@ Expected output:
 ```text
 customer_id | total_applications
 ```
-
+select customer_id,countapplication_id)
+ from loan_applications group by customer_id having count(application_id)>2
 ---
 
 ### 24. Find total loan amount requested by each customer.
@@ -337,7 +356,8 @@ Expected output:
 ```text
 customer_id | total_requested_amount
 ```
-
+select customer_id,count(loan_amount)
+from loan_applications group by customer_id having count(loan_amount)
 ---
 
 ### 25. Find the latest application date for each customer.
@@ -347,7 +367,8 @@ Expected output:
 ```text
 customer_id | latest_application_date
 ```
-
+select max(application_date)  over (partition by user_id) as latest_application_date
+from loan_applications 
 ---
 
 # Bonus Questions
@@ -368,7 +389,10 @@ Expected output:
 ```text
 application_id | customer_id | credit_score | credit_score_band
 ```
-
+select application_id ,customer_id ,credit_score , case when credit_score > 750 then 'Excellent' 
+when credit_scorebetween 700 and 749 then 'Good' 
+when credit_score between 650nd 699then 'AVG'
+else 'poor' end as credit_score_band from loan_applications
 ---
 
 ## 27. Count applications by credit score band.
@@ -378,7 +402,11 @@ Expected output:
 ```text
 credit_score_band | total_applications
 ```
-
+with cte as (select application_id ,customer_id ,credit_score , case when credit_score > 750 then 'Excellent' 
+when credit_scorebetween 700 and 749 then 'Good' 
+when credit_score between 650nd 699then 'AVG'
+else 'poor' end as credit_score_band from loan_applications) , select credit_score_band , count(total_applications)
+ group by credit_score_band
 ---
 
 ## 28. Calculate approval rate by credit score band.
@@ -398,6 +426,15 @@ Expected output:
 ```text
 customer_id | application_id | application_date | loan_status
 ```
+
+with cte as(  
+select application_id , loan_status
+ max(application_date)  over (partition by customer_id
+) as latest_application_date
+from loan_applications ) , select latest_application_date as latest_application_date ,application_id ,customer_id
+from cte where loan_status ='approved'
+
+
 
 Hint:
 
@@ -447,3 +484,5 @@ Ask him to submit:
 | GitHub submission               |     5 |
 
 Total: **100 marks**.
+
+
