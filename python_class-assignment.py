@@ -47,13 +47,13 @@ Add a comment before every question like this:
 Example:
 
 ```python
-print(type(age)) int
-print(type(name)) str
-print(type(salary)) float
-print(type(is_working)) - boolean
-print(type(skills))- list
-print(type(profile))- dictionary
-print(type(unique_cities)) - set
+print(type(age)) #int
+print(type(name)) # str
+print(type(salary)) #float
+print(type(is_working)) #- boolean
+print(type(skills)) #- list
+print(type(profile))#- dictionary
+print(type(unique_cities))# - set
 
 ```int
 str
@@ -140,7 +140,7 @@ print(employee["skills"[1]])
 ```text
 Python
 ```
-i used or checked chatgpt
+
 
 ---
 
@@ -250,7 +250,7 @@ cities = ["Delhi", "Mumbai", "Delhi", "Pune", "Mumbai", "Bangalore"]
 
 ## Q13. Convert the list into a set to remove duplicates.
 
-used chatgpt to  understand
+#used chatgpt to  understand
 unique=list(set(cities))
 print(unique)
 
@@ -264,7 +264,7 @@ Note: The order may be different. That is okay.
 
 ## Q14. Check whether `"Delhi"` exists in the set.
 
-i used chatgpt  because i was trying this 
+#i used chatgpt  because i was trying this 
 cities = ["Delhi", "Mumbai", "Delhi", "Pune", "Mumbai", "Bangalore"] for i in cities : if i=="Delhi": print("true") else: print ("false") i+1
 
 Expected output:
@@ -296,6 +296,8 @@ be less , but for not unique value and we have million values it takes very time
 ## Q16. What is Big O notation?
 
 Write the answer in 2–3 lines.
+O(n) # when interprator has to check all the details one by one 
+O(1) # when we have defined path 
 
 ---
 
@@ -362,7 +364,7 @@ print("Delhi" in cities)
 Expected answer:
 
 ```text
-O(1)
+O(n)
 ```
 
 ---
@@ -407,9 +409,9 @@ Now print the following:
 student_profile={"name":"gaurang sharma","age":26,"current role":"product analyst","target role":"AI Engineer","skills":["sql","excel","python"]}
 print(student_profile["name"])
 print(student_profile["current role"])
-print(student_profile["AI Engineer"])
+print(student_profile["target role"])
 print(student_profile["skills"][0])
-print(len(student_profile["skills"])) - used chatgpt
+print(len(student_profile["skills"])) # - used chatgpt
 # Evaluation Criteria
 
 | Area                     | Marks |
@@ -420,6 +422,6 @@ print(len(student_profile["skills"])) - used chatgpt
 | Mutability understanding |    15 |
 | Set usage                |    10 |
 | Big O answers            |    15 |
-| Clean code and comments  |    10 |
+| Clean code and comgit ments  |    10 |
 
 **Total: 100 marks**
