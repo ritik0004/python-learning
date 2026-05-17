@@ -446,7 +446,7 @@ Expected output:
 Use this list:
 
 ```python
-loan_statuses = ["Approved", "Pending", "Rejected", "Pending", "Approved"]
+    loan_statuses = ["Approved", "Pending", "Rejected", "Pending", "Approved"]
 ```
 
 Print all statuses except `"Pending"`.
