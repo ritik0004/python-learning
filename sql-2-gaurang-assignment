@@ -202,4 +202,44 @@ customer_id | customer_name | monthly_income | total_approved_loan_amount | inco
 with cte as (select    c.customer_id as customer_id, c.customer_name as customer_name, c.monthly_income as monthly_income
  ,(c.monthly_income*10) as income_multiple ,a.loan_amount as total_approved_loan_amount,a.loan_status as status from customers
 as c inner join loan_amount as a on a.customer_id=c.customer_id )
-select  customer_id , customer_name ,  monthly_income , total_approved_loan_amount , income_multiple where status ='approved' and total_approved_loan_amount>income_multiple
+select  customer_id , customer_name ,  monthly_income , total_approved_loan_amount , income_multiple where status ='approved'
+ and total_approved_loan_amount>income_multiple
+
+ ## Q37. Create a city-level loan performance report.
+
+select a.city    , count(b.application_id) as loan_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(case when  b.loan_status ='rejected' then 1 else 0 end
+ as rejected_applications),sum(case when  b.loan_status ='pending' then 1 else 0 end
+ as pending_applications),avg(b.credit_score) as avg_credit_score , sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_loan_amount)
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id group by a.city
+
+
+## Q38. Create an employment-type-level performance report.
+
+select a.employment_type   , count(b.application_id) as loan_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(case when  b.loan_status ='rejected' then 1 else 0 end
+ as rejected_applications),sum(case when  b.loan_status ='pending' then 1 else 0 end
+ as pending_applications),avg(b.loan_amount) as avg_loan_amount , sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_loan_amount)
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id group by a.employment_type 
+
+
+
+## Q39. Create a loan-type-level performance report.
+
+select b.loan_type   , count(b.application_id) as total_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(b.loan_amount) as total_requested_amount , sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_amount) , avg(b.credit_score) as avg_credit_score
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id group by b.loan_type 
+
+
+## Q40. Create a customer-level loan summary.
+
+select a.city,a.customer_id,a.customer_name,a.employment_type    , count(b.application_id) as total_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(case when  b.loan_status ='rejected' then 1 else 0 end
+ as rejected_applications),sum(case when  b.loan_status ='pending' then 1 else 0 end
+ as pending_applications),sum(b.loan_amount) as total_requested_amount, sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_loan_amount),MAX(b.application_date) AS latest_application_date
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id 
+group by a.city,a.customer_id,a.customer_name,a.employment_type 
