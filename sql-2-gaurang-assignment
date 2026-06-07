@@ -1,0 +1,245 @@
+#sql1
+select a.city,count(application_id) from customers a inner join loan_applications b on a.customer_id=b.customer_id
+group by a.city 
+
+#sql2
+select count(application_id) from loan_applications 
+
+#sql3
+select loan_status,count(application_id) from loan_applications group by loan_status 
+
+#sql4 
+select sum(loan_amount) from loan_applications where loan_status"Approved"
+
+#sql5
+select sum((select count(application_id) from loan_applications where loan_status"Approved" )/
+(select count(application_id) from loan_applications)*100)  from loan_applications
+
+#sql6
+select  count(application_id),case when loan_status='Approved' then 1 else 0 end as approved_applications,
+case when loan_status='Rejected' then 1 else 0 end as rejected_applications,
+case when  loan_status='Pending' then 1 else 0 end as pending_applications from loan_applications group by count(application_id)
+
+#sql7
+application_id | customer_id | customer_name | city | employment_type | loan_amount | loan_status
+
+select a.application_id, a.customer_id ,b.customer_name,b.city,b.employment_type,b.loan_amount,b.loan_status
+ from loan_applications  as a inner join customers as b on a.customer_id=b.customer_id 
+
+
+## Q8. Find city-wise total applications using `customers` and `loan_applications`. 
+select count(a.application_id),b.city from loan_applications  as a inner join customers as b on a.customer_id=b.customer_id group by b.city
+
+
+## Q9. Find employment-type-wise approval rate.
+
+with cte as (select   employment_type,count(application_id) as total_applications,(select count(application_id) from loan_applications where 
+application_id="Approved") as approved_applications 
+ from   loan_applications  group by employment_type)
+ select employment_type,total_applications,approved_applications , sum((approved_applications)/(total_applications))  from cte 
+
+
+
+## Q10. Find customer-wise total loan amount requested
+select a.customer_id,a.loan_amount,b.customer_name from loan_applications  as a inner join customers as b  on a.customer_id=b.customer_id 
+
+## Q11. Find cities with more than 2 loan applications.
+select count(a.application_id),b.city from loan_applications  as a inner join customers as b  on a.customer_id=b.customer_id
+group by b.city having count(a.application_id)>2;
+
+## Q12. Find employment types where average loan amount is greater than `500000`.
+
+select avg(b.loan_amount),a.employment_type from loan_applications  as b inner join customers as a  on a.customer_id=b.customer_id
+group by a.employment_type
+
+
+## Q13. Find customers who applied more than once.
+select count(b.application_id), a.customer_id,a.customer_name      from loan_applications  as b inner join customers as a  on a.customer_id=b.customer_id
+group by a.customer_id,a.customer_name having count(b.application_id)>1
+
+## Q14. Find loan types where total approved loan amount is greater than `1500000`.
+
+with cte as(select b.loan_type,sum(b.loan_amount) as total_apr_loan_amount  from loan_applications  as b where b.loan_status="Approved" group by b.loan_type),select * from cte where
+total_apr_loan_amount> 1500000
+
+#Q15. Create credit score bands.
+
+select  case when credit_score >= 750  then 'Excellent'  when credit_score between 700 and 749 then 'Good'  when credit_score between 699 and 600 then 'Average'
+else 'poor' end as credit_score_band , application_id , customer_id ,credit_score from loan_applications 
+
+#16 /#27
+with cte as (select  case when credit_score >= 750  then 'Excellent'  when credit_score between 700 and 749 then 'Good'  when credit_score between 699 and 600 then 'Average'
+else 'poor' end as credit_score_band , application_id , customer_id ,credit_score from loan_applications)
+select count(application_id), credit_score_band from cte group by credit_score_band
+
+## Q17. Calculate approval rate by credit score band.
+
+with cte1 as(select credit_score_band , count(application_id) as total_applications  , (select count(application_id) from loan_applications where loan_status ="approved") as xx  from cte)
+select credit_score_band,total_applications,xx  as approved_applications , sum(xx/total_applications) as approval_rate from cte1
+
+## Q18. Create loan amount bands.
+
+select  case when loan_amount >= 1000000  then 'Very High'  when loan_amount between 500000 and 999999 then 'High'  when loan_amount between 200000 and 499999 then 'Medium'
+else 'Low' end as loan_amount_band , application_id , loan_amount from loan_applications
+
+
+#19
+
+#20
+select   TO_CHAR(application_date, 'YYYY-MM') as month_case , count(application_id) as xx  from loan_applications grouup by TO_CHAR(application_date, 'YYYY-MM')
+
+
+#21
+
+select EXTRACT(MONTH FROM created_at) AS month, count(application_id) as total_applications,
+select count(application_id) from loan_applications where loan_status ="approved"
+FROM loan_applications
+
+## Q22. Calculate monthly total approved loan amount.
+
+select EXTRACT(MONTH FROM created_at) AS month ,sum(loan_amount) from loan_applications group by EXTRACT(MONTH FROM created_at) 
+
+
+## Q23. Find the first application date for each customer.
+
+with cte as (select  customer_id, min(application_date) over(partiton by customer_id)  as first_application_date from loan_applications )
+select c.first_application_date,c.customer_id , a.customer_id   from cte as c inner join customers  as a on a.customer_id  =c.customer_id
+
+## Q24
+with cte as (select  customer_id, max(application_date) over(partiton by customer_id)  as latest_application_date from loan_applications )
+select c.latest_application_date,c.customer_id , a.customer_id   from cte as c inner join customers  as a on a.customer_id  =c.customer_id
+
+## Q25. Using a CTE, find cities with approval rate greater than 60%.
+
+with cte as(select b.city  as city, count(application_id) as total_applications , (select count(application_id) from loan_applications where loan_status="approved")
+ as approved_applications 
+ from loan_applications as a inner join customers as b on a.customer_id=b.customer_id), cte1 as (  select city,total_applications,approved_applications,sum(total_applications/approval_rate)
+*100 as approval_rate from cte ),
+select * from cte1 where approval_rate>60
+
+
+
+## Q26. Using a CTE, find customers whose total requested loan amount is greater than `800000`
+```
+with cte as (select  sum(a.loan_amount)  as total_requested_amount,b.customer_name,a.customer_id  from loan_applications as a inner join customers as b on a.customer_id=b.customer_id group by 
+b.customer_name,a.customer_id) select * from cte where total_requested_amount>800000
+
+
+## Q28.
+with cte as(select  case when loan_amount >= 1000000  then 'Very High'  when loan_amount between 500000 and 999999 then 'High'  when loan_amount between 200000 and 499999 then 'Medium'
+else 'Low' end as loan_amount_band ,  loan_amount from loan_applications) select loan_amount_band, sum(loan_amount) from cte group by loan_amount_band
+
+## Q29. Rank loan applications by loan amount from highest to lowest.
+
+select   application_id ,customer_id,loan_amount, rank() over(partition by customer_id order by loan_amount desc) as loan_rank from loan_applications 
+
+
+## Q30. Find the highest loan application for each city.
+with cte as (select  customer_id,application_id,loan_amount max(application_date) over(partiton by customer_id)  as latest_application_date from loan_applications )
+select c.latest_application_date,c.customer_id , a.customer_id   from cte as c inner join customers  as a on a.customer_id  =c.customer_id
+
+
+
+# Q31. Find the latest loan application for each customer.
+with cte as (select a.city as city ,a.customer_id as customer_id,b.application_id as application_id,b.loan_amount as loan_amount,b.application_date as application_date
+ from customers as a inner join  loan_applications  as b on a.customer_id=b.customer_id)
+select city , application_id ,customer_id ,loan_amount,row_number()  over(PARTITION by customer_id order by application_date DESC) as recent_app  from cte 
+
+
+## Q32. Find customers whose latest application was approved.
+with cte as (select  customer_id , application_date, application_id , loan_status ,row_number() over(partition by customer_id order by application_date desc ) as rn from 
+loan_applications ) , select  b.customer_id , b.application_date, b.application_id , b.loan_status ,a.customer_name
+from customers as a inner join  cte  as b on a.customer_id=b.customer_id and b.loan_status="approved" and b.rn=1
+
+
+## Q33. Show approved loan applications with total payment received.
+select a.application_id ,a.customer_id , a.loan_amount ,b.payment_status from loan_applications as a inner join loan_payments as b on a.application_id=b.application_id
+and  b.payment_status='paid'
+
+## Q34. Find applications where payment status has at least one missed payment.
+
+select a.application_id ,a.customer_id , a.loan_amount ,b.payment_status ,count(*) as missed_payment_count from loan_applications as a inner join loan_payments as b on a.application_id=b.application_id
+where  b.payment_status='Missed' GROUP BY  a.application_id, a.customer_id, a.loan_amount
+
+
+##36
+select a.application_id ,a.customer_id , a.loan_amount ,b.payment_status ,count(*) as missed_payment_count from loan_applications as a inner join loan_payments as b on a.application_id=b.application_id
+where  b.payment_status='Missed' 
+
+##35
+with cte as (select a.application_id ,a.customer_id , sum(a.loan_amount) as x1 ,sum(b.payment_amount)  as x2 from loan_applications as a inner join loan_payments as b on a.application_id=b.application_id
+and  b.payment_status='paid' group by a.application_id ,a.customer_id ) , select a.application_id,a.customer_id , x1 , x2 , sum(x2/x1) as recovered from cte 
+
+
+## Q41. Find the top 3 customers by total requested loan amount.
+with cte as(select  b.customer_id , b.application_id , sum(b.loan_amount)  as total_requested_amount,a.customer_name from customers as a 
+inner join  loan_applications as b on a.customer_id=b.customer_id group by   b.customer_id , a.customer_name ), cte1 as 
+(select * , rank() over( order by total_requested_amount desc)as customer_rank from cte) 
+select * from  cte1 where customer_rank<=3
+
+
+## Q42. Find the top customer by total requested loan amount in each city.
+
+with cte as(select a.city as city, b.customer_id , b.application_id , sum(b.loan_amount)  as total_requested_amount,a.customer_name from customers as a 
+inner join  loan_applications as b on a.customer_id=b.customer_id group by  a.city as city, b.customer_id , a.customer_name ), cte1 as 
+(select * , rank() over(partition by city order by total_requested_amount desc)as customer_rank from cte) 
+select * from  cte1 where customer_rank=1
+
+## Q43. Find customers who have applied more than once and have at least one approved application.
+#customer_id | customer_name | total_applications | approved_applications
+with cte as(select customer_id, count(application_id) as total_applications , (select count(application_id)
+ from loan_applications where loan_status='approved' ) as approved_applications  from loan_applications  group by  customer_id ), 
+ select b.customer_id,a.customer_name,b.total_applications , b.approved_applications
+  from cte as b inner join customers as a on a.customer_id=b.customer_id where b.approved_applications>=1 and b.total_applications>1
+
+
+## Q44. Find customers whose approved loan amount is more than 10 times their monthly income.
+
+Expected output:
+
+```text
+customer_id | customer_name | monthly_income | total_approved_loan_amount | income_multiple
+with cte as (select    c.customer_id as customer_id, c.customer_name as customer_name, c.monthly_income as monthly_income
+ ,(c.monthly_income*10) as income_multiple ,a.loan_amount as total_approved_loan_amount,a.loan_status as status from customers
+as c inner join loan_amount as a on a.customer_id=c.customer_id )
+select  customer_id , customer_name ,  monthly_income , total_approved_loan_amount , income_multiple where status ='approved'
+ and total_approved_loan_amount>income_multiple
+
+ ## Q37. Create a city-level loan performance report.
+
+select a.city    , count(b.application_id) as loan_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(case when  b.loan_status ='rejected' then 1 else 0 end
+ as rejected_applications),sum(case when  b.loan_status ='pending' then 1 else 0 end
+ as pending_applications),avg(b.credit_score) as avg_credit_score , sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_loan_amount)
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id group by a.city
+
+
+## Q38. Create an employment-type-level performance report.
+
+select a.employment_type   , count(b.application_id) as loan_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(case when  b.loan_status ='rejected' then 1 else 0 end
+ as rejected_applications),sum(case when  b.loan_status ='pending' then 1 else 0 end
+ as pending_applications),avg(b.loan_amount) as avg_loan_amount , sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_loan_amount)
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id group by a.employment_type 
+
+
+
+## Q39. Create a loan-type-level performance report.
+
+select b.loan_type   , count(b.application_id) as total_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(b.loan_amount) as total_requested_amount , sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_amount) , avg(b.credit_score) as avg_credit_score
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id group by b.loan_type 
+
+
+## Q40. Create a customer-level loan summary.
+
+select a.city,a.customer_id,a.customer_name,a.employment_type    , count(b.application_id) as total_applications ,sum(case when  b.loan_status ='approved' then 1 else 0 end
+ as approved_applications) ,sum(case when  b.loan_status ='rejected' then 1 else 0 end
+ as rejected_applications),sum(case when  b.loan_status ='pending' then 1 else 0 end
+ as pending_applications),sum(b.loan_amount) as total_requested_amount, sum(case when b.loan_status ='approved' then b.loan_amount else 0 
+ end as total_approved_loan_amount),MAX(b.application_date) AS latest_application_date
+from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id 
+group by a.city,a.customer_id,a.customer_name,a.employment_type 
