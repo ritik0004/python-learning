@@ -1,0 +1,12 @@
+[
+  {
+    "customer_id": "C001",
+    "customer_name": "Gaurang",
+    "city": "Delhi"
+  },
+  {
+    "customer_id": "C002",
+    "customer_name": "Raman",
+    "city": "Mumbai"
+  }
+]

@@ -1,0 +1,4 @@
+application_id,customer_id,loan_amount,loan_status
+APP001,C001,500000,Approved
+APP002,C002,300000,Rejected
+APP003,C001,750000,Approved
