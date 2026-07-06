@@ -1,0 +1,10 @@
+application_id,customer_id,loan_amount,loan_status,credit_score
+APP001,C001,500000,Approved,760
+APP002,C002,300000,Rejected,620
+APP003,C001,750000,Approved,710
+APP004,C003,200000,Pending,580
+APP005,C004,1000000,Approved,800
+APP006,C005,400000,Rejected,650
+APP007,C002,900000,Approved,740
+APP008,C006,250000,Pending,600
+APP009,C007,850000,Approved,780
