@@ -1,12 +1,9 @@
 [
-  {
-    "customer_id": "C001",
-    "customer_name": "Gaurang",
-    "city": "Delhi"
-  },
-  {
-    "customer_id": "C002",
-    "customer_name": "Raman",
-    "city": "Mumbai"
-  }
+  {"customer_id": "C001", "customer_name": "Gaurang", "city": "Delhi", "employment_type": "Salaried"},
+  {"customer_id": "C002", "customer_name": "Raman", "city": "Mumbai", "employment_type": "Self-Employed"},
+  {"customer_id": "C003", "customer_name": "Amit", "city": "Bangalore", "employment_type": "Salaried"},
+  {"customer_id": "C004", "customer_name": "Neha", "city": "Pune", "employment_type": "Salaried"},
+  {"customer_id": "C005", "customer_name": "Sneha", "city": "Delhi", "employment_type": "Self-Employed"},
+  {"customer_id": "C006", "customer_name": "Rohit", "city": "Chennai", "employment_type": "Salaried"},
+  {"customer_id": "C007", "customer_name": "Ananya", "city": "Hyderabad", "employment_type": "Self-Employed"}
 ]
