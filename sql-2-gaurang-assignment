@@ -243,3 +243,7 @@ select a.city,a.customer_id,a.customer_name,a.employment_type    , count(b.appli
  end as total_approved_loan_amount),MAX(b.application_date) AS latest_application_date
 from customers as a inner join loan_applications as b   ON a.customer_id = b.customer_id 
 group by a.city,a.customer_id,a.customer_name,a.employment_type 
+
+
+
+I am editing this for PR creation testing
